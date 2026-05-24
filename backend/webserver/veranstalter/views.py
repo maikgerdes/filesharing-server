@@ -1,4 +1,4 @@
-from drf_spectacular.utils import OpenApiParameter, OpenApiTypes, extend_schema, extend_schema_view
+from drf_spectacular.utils import OpenApiExample, OpenApiParameter, OpenApiTypes, extend_schema, extend_schema_view
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
@@ -12,6 +12,9 @@ from webserver.models import Veranstalter
     get=extend_schema(
         operation_id='veranstalter_list_filtered',
         summary='Veranstalter auflisten und filtern',
+        description=(
+            'Gibt eine Liste von Veranstaltern zurück. Unterstützt Filter über Query-Parameter.'
+        ),
         responses=serializers.VeranstalterListSerializer(many=True),
         parameters=[
             OpenApiParameter(
@@ -29,10 +32,32 @@ from webserver.models import Veranstalter
                 description='Filtert Veranstalter nach Hauptsitz',
             ),
         ],
+        examples=[
+            OpenApiExample(
+                'Filter nach Name',
+                value={
+                    'curl': "curl -X GET 'https://api.example.com/api/v1/veranstalter?veranstalter_name=Meier'"
+                },
+            ),
+            OpenApiExample(
+                'Beispiel-Response (Liste)',
+                value=[
+                    {
+                        'Veranstalter_ID': 7,
+                        'Veranstalter_Name': 'Meier GmbH',
+                        'Veranstalter_Hauptsitz': 'Berlin'
+                    }
+                ],
+                response_only=True,
+            ),
+        ],
     ),
     post=extend_schema(
         operation_id='veranstalter_create',
         summary='Veranstalter anlegen',
+        description=(
+            'Legt einen neuen Veranstalter an. Alle notwendigen Felder werden im Request-Body übergeben.'
+        ),
         request=serializers.VeranstalterCreateSerializer(),
         responses=serializers.VeranstalterDetailSerializer(),
     ),
@@ -75,6 +100,9 @@ class VeranstalterListCreateView(GenericAPIView):
     get=extend_schema(
         operation_id='veranstalter_detail',
         summary='Veranstalter anzeigen',
+        description=(
+            'Gibt die Detailinformationen eines Veranstalters zurück.\n\nParameter:\n- `veranstalter_id` (Pfad): ID des Veranstalters.'
+        ),
         responses=serializers.VeranstalterDetailSerializer(),
         parameters=[
             OpenApiParameter(

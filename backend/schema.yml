@@ -7,6 +7,7 @@ paths:
   /api/v1/einladungen/:
     get:
       operationId: einladungen_list_filtered
+      description: Gibt eine Liste von Einladungen zurück.
       summary: Einladungen auflisten und filtern
       parameters:
       - in: query
@@ -46,9 +47,32 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Veranstaltung_Einladung'
+              examples:
+                FilterNachVeranstaltung:
+                  value:
+                  - curl: curl -X GET 'https://api.example.com/api/v1/einladungen?veranstaltung_id=12'
+                  summary: Filter nach Veranstaltung
+                DatumsfilterExact:
+                  value:
+                  - curl: curl -X GET 'https://api.example.com/api/v1/einladungen?datum=exact:2026-05-24'
+                  summary: Datumsfilter exact
+                KombinierterFilter:
+                  value:
+                  - curl: curl -X GET 'https://api.example.com/api/v1/einladungen?anfragesteller_id=5&datum=lt:2026-06-01'
+                  summary: Kombinierter Filter
+                Beispiel-Response(Liste):
+                  value:
+                  - - Veranstaltung_Einladung_ID: 34
+                      Veranstaltung_ID: 12
+                      Anfragesteller_ID: 5
+                      Einladung_Datum: '2026-06-01'
+                      Betreff: Einladung zur Konferenz
+                      Status: Offen
+                  summary: Beispiel-Response (Liste)
           description: ''
     post:
       operationId: einladung_create
+      description: Legt eine neue Einladung an.
       summary: Einladung anlegen
       tags:
       - einladungen
@@ -57,6 +81,14 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Veranstaltung_EinladungCreate'
+            examples:
+              Beispiel-Anfrage:
+                value:
+                  Veranstaltung_ID: 12
+                  Anfragesteller_ID: 5
+                  Einladung_Datum: '2026-06-01'
+                  Betreff: Einladung zur Konferenz
+                  Beschreibung: Wir möchten Sie herzlich einladen.
           application/x-www-form-urlencoded:
             schema:
               $ref: '#/components/schemas/Veranstaltung_EinladungCreate'
@@ -74,10 +106,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Veranstaltung_Einladung'
+              examples:
+                Beispiel-Response:
+                  value:
+                    Veranstaltung_Einladung_ID: 34
+                    Veranstaltung_ID: 12
+                    Anfragesteller_ID: 5
+                    Einladung_Datum: '2026-06-01'
+                    Betreff: Einladung zur Konferenz
+                    Beschreibung: Wir möchten Sie herzlich einladen.
+                    Status: Offen
           description: ''
   /api/v1/einladungen/{einladung_id}/:
     get:
       operationId: einladung_detail
+      description: |+
+        Gibt die Detailinformationen einer einzelnen Einladung zurück.
+
       summary: Einladung anzeigen
       parameters:
       - in: path
@@ -98,9 +143,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Veranstaltung_Einladung'
+              examples:
+                Beispiel-URL:
+                  value:
+                    curl: curl -X GET 'https://api.example.com/api/v1/einladungen/34/'
+                Beispiel-Response(Detail):
+                  value:
+                    Veranstaltung_Einladung_ID: 34
+                    Veranstaltung_ID: 12
+                    Anfragesteller_ID: 5
+                    Einladung_Datum: '2026-06-01'
+                    Betreff: Einladung zur Konferenz
+                    Beschreibung: Wir möchten Sie herzlich einladen.
+                    Status: Offen
+                  summary: Beispiel-Response (Detail)
           description: ''
     patch:
       operationId: einladung_partial_update
+      description: |
+        Führt ein partielles Update an einer bestehenden Einladung durch.
       summary: Einladung anpassen
       parameters:
       - in: path
@@ -116,6 +177,12 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/PatchedVeranstaltung_EinladungCreate'
+            examples:
+              Patch-Beispiel:
+                value:
+                  curl: 'curl -X PATCH ''https://api.example.com/api/v1/einladungen/34/''
+                    -H ''Content-Type: application/json'' -d ''{"Betreff": "Neuer
+                    Betreff"}'''
           application/x-www-form-urlencoded:
             schema:
               $ref: '#/components/schemas/PatchedVeranstaltung_EinladungCreate'
@@ -132,10 +199,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Veranstaltung_Einladung'
+              examples:
+                Beispiel-Response(Patch):
+                  value:
+                    Veranstaltung_Einladung_ID: 34
+                    Veranstaltung_ID: 12
+                    Anfragesteller_ID: 5
+                    Einladung_Datum: '2026-06-01'
+                    Betreff: Neuer Betreff
+                    Beschreibung: Wir möchten Sie herzlich einladen.
+                    Status: Offen
+                  summary: Beispiel-Response (Patch)
           description: ''
   /api/v1/einladungen/{einladung_id}/entscheidungen:
     post:
       operationId: einladung_entscheidung_create
+      description: |+
+        Legt eine Entscheidung (z. B. Annahme/Ablehnung) für eine Einladung an.
+
       summary: Entscheidung zu Einladung anlegen
       parameters:
       - in: path
@@ -151,6 +232,18 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Einladung_EntscheidungCreateNested'
+            examples:
+              Beispiel-Anfrage:
+                value:
+                  Entscheidung: angenommen
+                  Entscheidung_Datum: '2026-06-02'
+                  Entscheider_ID: 2
+              CURL-Beispiel:
+                value:
+                  curl: 'curl -X POST ''https://api.example.com/api/v1/einladungen/34/entscheidungen/''
+                    -H ''Content-Type: application/json'' -d ''{"Entscheidung": "angenommen",
+                    "Entscheidung_Datum": "2026-06-02", "Entscheider_ID": 2}'''
+                summary: cURL-Beispiel
           application/x-www-form-urlencoded:
             schema:
               $ref: '#/components/schemas/Einladung_EntscheidungCreateNested'
@@ -168,10 +261,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Einladung_Entscheidung'
+              examples:
+                CURL-Beispiel:
+                  value:
+                    curl: 'curl -X POST ''https://api.example.com/api/v1/einladungen/34/entscheidungen/''
+                      -H ''Content-Type: application/json'' -d ''{"Entscheidung":
+                      "angenommen", "Entscheidung_Datum": "2026-06-02", "Entscheider_ID":
+                      2}'''
+                  summary: cURL-Beispiel
+                Beispiel-Response(Entscheidung):
+                  value:
+                    Einladung_Entscheidung_ID: 21
+                    Veranstaltung_Einladung_ID: 34
+                    Entscheidung: angenommen
+                    Entscheidung_Datum: '2026-06-02'
+                    Entscheider_ID: 2
+                  summary: Beispiel-Response (Entscheidung)
           description: ''
   /api/v1/einladungen/{einladung_id}/kommentare:
     post:
       operationId: einladung_kommentar_create
+      description: |
+        Erstellt einen Kommentar zur angegebenen Einladung.
+
+        Parameter:
       summary: Kommentar zu Einladung anlegen
       parameters:
       - in: path
@@ -200,6 +313,12 @@ paths:
                   Absender_ID: 2
                   Kommentar_Inhalt: Danke, ich habe es angepasst.
                 summary: Antwort auf Kommentar
+              CURL-Beispiel:
+                value:
+                  curl: 'curl -X POST ''https://api.example.com/api/v1/einladungen/34/kommentare/''
+                    -H ''Content-Type: application/json'' -d ''{"Parent_ID": null,
+                    "Absender_ID": 2, "Kommentar_Inhalt": "Sieht gut aus."}'''
+                summary: cURL-Beispiel
           application/x-www-form-urlencoded:
             schema:
               $ref: '#/components/schemas/Einladung_KommentarCreateNested'
@@ -217,6 +336,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Einladung_Kommentar'
+              examples:
+                CURL-Beispiel:
+                  value:
+                    curl: 'curl -X POST ''https://api.example.com/api/v1/einladungen/34/kommentare/''
+                      -H ''Content-Type: application/json'' -d ''{"Parent_ID": null,
+                      "Absender_ID": 2, "Kommentar_Inhalt": "Sieht gut aus."}'''
+                  summary: cURL-Beispiel
+                Beispiel-Response(Kommentar):
+                  value:
+                    Einladung_Kommentar_ID: 78
+                    Veranstaltung_Einladung_ID: 34
+                    Parent_ID: null
+                    Absender_ID: 2
+                    Kommentar_Inhalt: Sieht gut aus.
+                    Erstellt_Am: '2026-05-24T12:34:56Z'
+                  summary: Beispiel-Response (Kommentar)
           description: ''
   /api/v1/upload/docx/:
     post:
@@ -302,6 +437,8 @@ paths:
   /api/v1/veranstalter/:
     get:
       operationId: veranstalter_list_filtered
+      description: Gibt eine Liste von Veranstaltern zurück. Unterstützt Filter über
+        Query-Parameter.
       summary: Veranstalter auflisten und filtern
       parameters:
       - in: query
@@ -328,9 +465,22 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/VeranstalterList'
+              examples:
+                FilterNachName:
+                  value:
+                  - curl: curl -X GET 'https://api.example.com/api/v1/veranstalter?veranstalter_name=Meier'
+                  summary: Filter nach Name
+                Beispiel-Response(Liste):
+                  value:
+                  - - Veranstalter_ID: 7
+                      Veranstalter_Name: Meier GmbH
+                      Veranstalter_Hauptsitz: Berlin
+                  summary: Beispiel-Response (Liste)
           description: ''
     post:
       operationId: veranstalter_create
+      description: Legt einen neuen Veranstalter an. Alle notwendigen Felder werden
+        im Request-Body übergeben.
       summary: Veranstalter anlegen
       tags:
       - veranstalter
@@ -360,6 +510,11 @@ paths:
   /api/v1/veranstalter/{veranstalter_id}/:
     get:
       operationId: veranstalter_detail
+      description: |-
+        Gibt die Detailinformationen eines Veranstalters zurück.
+
+        Parameter:
+        - `veranstalter_id` (Pfad): ID des Veranstalters.
       summary: Veranstalter anzeigen
       parameters:
       - in: path
@@ -418,6 +573,8 @@ paths:
   /api/v1/veranstaltungen/:
     get:
       operationId: veranstaltung_list_filtered
+      description: Gibt eine Liste von Veranstaltungen zurück. Unterstützt Filter
+        nach Name, Kategorie und Veranstalter.
       summary: Veranstaltungen auflisten und filtern
       parameters:
       - in: query
@@ -449,9 +606,23 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/VeranstaltungList'
+              examples:
+                FilterNachName:
+                  value:
+                  - curl: curl -X GET 'https://api.example.com/api/v1/veranstaltungen?veranstaltung_name=Konferenz'
+                  summary: Filter nach Name
+                Beispiel-Response(Liste):
+                  value:
+                  - - Veranstaltung_ID: 12
+                      Veranstaltung_Name: Konferenz 2026
+                      Veranstalter_ID: 7
+                      Veranstaltung_Kategorie_ID: 3
+                  summary: Beispiel-Response (Liste)
           description: ''
     post:
       operationId: veranstaltung_create
+      description: Legt eine neue Veranstaltung an. Relevante Felder werden im Request-Body
+        übergeben.
       summary: Veranstaltung anlegen
       tags:
       - veranstaltungen
@@ -481,6 +652,11 @@ paths:
   /api/v1/veranstaltungen/{veranstaltung_id}/:
     get:
       operationId: veranstaltung_detail
+      description: |-
+        Gibt Detailinformationen einer Veranstaltung zurück.
+
+        Parameter:
+        - `veranstaltung_id` (Pfad): ID der Veranstaltung.
       summary: Veranstaltung anzeigen
       parameters:
       - in: path
@@ -501,6 +677,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/VeranstaltungDetail'
+              examples:
+                Beispiel-URL:
+                  value:
+                    curl: curl -X GET 'https://api.example.com/api/v1/veranstaltungen/12/'
+                Beispiel-Response(Detail):
+                  value:
+                    Veranstaltung_ID: 12
+                    Veranstaltung_Name: Konferenz 2026
+                    Veranstalter_ID: 7
+                    Veranstaltung_Kategorie_ID: 3
+                    Beschreibung: Jährliche Konferenz.
+                  summary: Beispiel-Response (Detail)
           description: ''
     patch:
       operationId: veranstaltung_partial_update
@@ -539,6 +727,11 @@ paths:
   /api/v1/veranstaltungen/{veranstaltung_id}/tickets:
     post:
       operationId: veranstaltung_ticket_create
+      description: |-
+        Fügt einen Ticket-Umfang für eine bestehende Veranstaltung hinzu.
+
+        Parameter:
+        - `veranstaltung_id` (Pfad): ID der Veranstaltung.
       summary: Ticket-Umfang für Veranstaltung anlegen
       parameters:
       - in: path
@@ -554,6 +747,12 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Veranstaltung_Ticket_UmfangCreateNested'
+            examples:
+              Beispiel-Anfrage:
+                value:
+                  Ticket_Typ: Standard
+                  Preis: '49.00'
+                  Verfuegbar: true
           application/x-www-form-urlencoded:
             schema:
               $ref: '#/components/schemas/Veranstaltung_Ticket_UmfangCreateNested'
@@ -571,10 +770,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Veranstaltung_Ticket_Umfang'
+              examples:
+                Beispiel-Response(Ticket):
+                  value:
+                    Veranstaltung_ID: 12
+                    Ticket_Typ: Standard
+                    Preis: '49.00'
+                    Verfuegbar: true
+                  summary: Beispiel-Response (Ticket)
           description: ''
   /api/v1/veranstaltungen/{veranstaltung_id}/tickets/{ticket_typ}:
     patch:
       operationId: veranstaltung_ticket_partial_update
+      description: Passt einen bestehenden Ticket-Umfang an. Pfad-Parameter spezifizieren
+        die Veranstaltung und den Ticket-Typ.
       summary: Ticket-Umfang anpassen
       parameters:
       - in: path

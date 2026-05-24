@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 from webserver.uploads.views import PostDocxDocument, PostUpdateDateiJson, PostValidateDateiJson
-from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
 
 urlpatterns = [
@@ -30,6 +30,7 @@ urlpatterns = [
     path('api/v1/veranstaltungen/', include('webserver.veranstaltungen.urls')),
     path('api/v1/einladungen/', include('webserver.einladungen.urls')),
     path('api/v1/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/v1/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('api/v1/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc-v1'),
     # path('files/', views2.display_file)
 ]

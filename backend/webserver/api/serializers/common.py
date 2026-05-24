@@ -126,10 +126,9 @@ class DateiUploadSerializer(serializers.Serializer):
 class DateiModelValidationSerializer(serializers.Serializer):
     Datei_ID = serializers.PrimaryKeyRelatedField(queryset=Datei.objects.all())
     Zielmodell = serializers.ChoiceField(choices=["veranstalter", "veranstaltung", "einladung"], required=False)
-    Zielmodelle = serializers.ListField(
-        child=serializers.ChoiceField(choices=["veranstalter", "veranstaltung", "einladung"]),
+    Zielmodelle = serializers.MultipleChoiceField(
+        choices=["veranstalter", "veranstaltung", "einladung"],
         required=False,
-        allow_empty=False,
     )
     Anlegen_Bei_Kompatibilitaet = serializers.BooleanField(required=False, default=False)
 

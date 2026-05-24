@@ -1,4 +1,4 @@
-from drf_spectacular.utils import OpenApiParameter, OpenApiTypes, extend_schema, extend_schema_view
+from drf_spectacular.utils import OpenApiExample, OpenApiParameter, OpenApiTypes, extend_schema, extend_schema_view
 from webserver.api import serializers
 from webserver.models import Veranstaltung, Veranstaltung_Ticket_Umfang
 from django.shortcuts import get_object_or_404
@@ -12,6 +12,9 @@ from rest_framework import status
     get=extend_schema(
         operation_id='veranstaltung_list_filtered',
         summary='Veranstaltungen auflisten und filtern',
+        description=(
+            'Gibt eine Liste von Veranstaltungen zurück. Unterstützt Filter nach Name, Kategorie und Veranstalter.'
+        ),
         responses=serializers.VeranstaltungListSerializer(many=True),
         parameters=[
             OpenApiParameter(
@@ -36,10 +39,33 @@ from rest_framework import status
                 description='Filtert Veranstaltungen nach der Veranstalter_ID',
             ),
         ],
+        examples=[
+            OpenApiExample(
+                'Filter nach Name',
+                value={
+                    'curl': "curl -X GET 'https://api.example.com/api/v1/veranstaltungen?veranstaltung_name=Konferenz'"
+                },
+            ),
+            OpenApiExample(
+                'Beispiel-Response (Liste)',
+                value=[
+                    {
+                        'Veranstaltung_ID': 12,
+                        'Veranstaltung_Name': 'Konferenz 2026',
+                        'Veranstalter_ID': 7,
+                        'Veranstaltung_Kategorie_ID': 3
+                    }
+                ],
+                response_only=True,
+            ),
+        ],
     ),
     post=extend_schema(
         operation_id='veranstaltung_create',
         summary='Veranstaltung anlegen',
+        description=(
+            'Legt eine neue Veranstaltung an. Relevante Felder werden im Request-Body übergeben.'
+        ),
         request=serializers.VeranstaltungCreateSerializer(),
         responses=serializers.VeranstaltungDetailSerializer(),
     ),
@@ -85,6 +111,9 @@ class VeranstaltungListCreateView(GenericAPIView):
     post=extend_schema(
         operation_id='veranstaltung_ticket_create',
         summary='Ticket-Umfang für Veranstaltung anlegen',
+        description=(
+            'Fügt einen Ticket-Umfang für eine bestehende Veranstaltung hinzu.\n\nParameter:\n- `veranstaltung_id` (Pfad): ID der Veranstaltung.'
+        ),
         request=serializers.Veranstaltung_Ticket_UmfangCreateNestedSerializer(),
         responses=serializers.Veranstaltung_Ticket_UmfangSerializer(),
         parameters=[
@@ -94,6 +123,27 @@ class VeranstaltungListCreateView(GenericAPIView):
                 location=OpenApiParameter.PATH,
                 required=True,
                 description='ID der Veranstaltung, zu der der Ticket-Umfang gehört',
+            ),
+        ],
+        examples=[
+            OpenApiExample(
+                'Beispiel-Anfrage',
+                value={
+                    'Ticket_Typ': 'Standard',
+                    'Preis': '49.00',
+                    'Verfuegbar': True
+                },
+                request_only=True,
+            ),
+            OpenApiExample(
+                'Beispiel-Response (Ticket)',
+                value={
+                    'Veranstaltung_ID': 12,
+                    'Ticket_Typ': 'Standard',
+                    'Preis': '49.00',
+                    'Verfuegbar': True
+                },
+                response_only=True,
             ),
         ],
     ),
@@ -115,6 +165,9 @@ class VeranstaltungTicketCreateView(GenericAPIView):
     patch=extend_schema(
         operation_id='veranstaltung_ticket_partial_update',
         summary='Ticket-Umfang anpassen',
+        description=(
+            'Passt einen bestehenden Ticket-Umfang an. Pfad-Parameter spezifizieren die Veranstaltung und den Ticket-Typ.'
+        ),
         request=serializers.Veranstaltung_Ticket_UmfangUpdateSerializer(),
         responses=serializers.Veranstaltung_Ticket_UmfangSerializer(),
         parameters=[
@@ -161,6 +214,9 @@ class VeranstaltungTicketDetailView(GenericAPIView):
     get=extend_schema(
         operation_id='veranstaltung_detail',
         summary='Veranstaltung anzeigen',
+        description=(
+            'Gibt Detailinformationen einer Veranstaltung zurück.\n\nParameter:\n- `veranstaltung_id` (Pfad): ID der Veranstaltung.'
+        ),
         responses=serializers.VeranstaltungDetailSerializer(),
         parameters=[
             OpenApiParameter(
@@ -169,6 +225,25 @@ class VeranstaltungTicketDetailView(GenericAPIView):
                 location=OpenApiParameter.PATH,
                 required=True,
                 description='ID der spezifischen Veranstaltung',
+            ),
+        ],
+        examples=[
+            OpenApiExample(
+                'Beispiel-URL',
+                value={
+                    'curl': "curl -X GET 'https://api.example.com/api/v1/veranstaltungen/12/'"
+                },
+            ),
+            OpenApiExample(
+                'Beispiel-Response (Detail)',
+                value={
+                    'Veranstaltung_ID': 12,
+                    'Veranstaltung_Name': 'Konferenz 2026',
+                    'Veranstalter_ID': 7,
+                    'Veranstaltung_Kategorie_ID': 3,
+                    'Beschreibung': 'Jährliche Konferenz.'
+                },
+                response_only=True,
             ),
         ],
     ),

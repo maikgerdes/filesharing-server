@@ -15,7 +15,7 @@ services:
     build:
       context: .
       dockerfile: backend/Dockerfile
-    container_name: django_app
+    container_name: ${DJANGO_CONTAINER_NAME}
     restart: on-failure
     volumes:
       - .:/workspaces:cached
@@ -28,7 +28,7 @@ services:
       - .env
   database:
     image: postgres:17
-    container_name: postgres_db
+    container_name: ${POSTGRES_CONTAINER_NAME}
     volumes:
       - postgres_db:/var/lib/postgresql/data
     environment:

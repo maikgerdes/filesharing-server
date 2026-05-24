@@ -12,6 +12,9 @@ from rest_framework import status
     get=extend_schema(
         operation_id='einladungen_list_filtered',
         summary='Einladungen auflisten und filtern',
+        description=(
+            'Gibt eine Liste von Einladungen zurück.'
+        ),
         responses=serializers.Veranstaltung_EinladungSerializer(many=True),
         parameters=[
             OpenApiParameter(
@@ -43,12 +46,75 @@ from rest_framework import status
                 description='Filtert nach dem Einladungsdatum. Formate: exact:YYYY-MM-DD, lt:YYYY-MM-DD, gt:YYYY-MM-DD',
             ),
         ],
+        examples=[
+            OpenApiExample(
+                'Filter nach Veranstaltung',
+                value={
+                    'curl': "curl -X GET 'https://api.example.com/api/v1/einladungen?veranstaltung_id=12'"
+                },
+            ),
+            OpenApiExample(
+                'Datumsfilter exact',
+                value={
+                    'curl': "curl -X GET 'https://api.example.com/api/v1/einladungen?datum=exact:2026-05-24'"
+                },
+            ),
+            OpenApiExample(
+                'Kombinierter Filter',
+                value={
+                    'curl': "curl -X GET 'https://api.example.com/api/v1/einladungen?anfragesteller_id=5&datum=lt:2026-06-01'"
+                },
+            ),
+            OpenApiExample(
+                'Beispiel-Response (Liste)',
+                value=[
+                    {
+                        'Veranstaltung_Einladung_ID': 34,
+                        'Veranstaltung_ID': 12,
+                        'Anfragesteller_ID': 5,
+                        'Einladung_Datum': '2026-06-01',
+                        'Betreff': 'Einladung zur Konferenz',
+                        'Status': 'Offen'
+                    }
+                ],
+                response_only=True,
+            ),
+        ],
     ),
     post=extend_schema(
         operation_id='einladung_create',
         summary='Einladung anlegen',
+        description=(
+            'Legt eine neue Einladung an.'
+        ),
         request=serializers.Veranstaltung_EinladungCreateSerializer(),
         responses=serializers.Veranstaltung_EinladungSerializer(),
+        examples=[
+            OpenApiExample(
+                'Beispiel-Anfrage',
+                value={
+                    'Veranstaltung_ID': 12,
+                    'Anfragesteller_ID': 5,
+                    'Einladung_Datum': '2026-06-01',
+                    'Betreff': 'Einladung zur Konferenz',
+                    'Beschreibung': 'Wir möchten Sie herzlich einladen.'
+                },
+                request_only=True,
+            ),
+            OpenApiExample(
+                'Beispiel-Response',
+                value={
+                    'Veranstaltung_Einladung_ID': 34,
+                    'Veranstaltung_ID': 12,
+                    'Anfragesteller_ID': 5,
+                    'Einladung_Datum': '2026-06-01',
+                    'Betreff': 'Einladung zur Konferenz',
+                    'Beschreibung': 'Wir möchten Sie herzlich einladen.',
+                    'Status': 'Offen'
+                },
+                response_only=True,
+            ),
+        ],
     ),
 )
 class EinladungListCreateView(GenericAPIView):
@@ -112,6 +178,9 @@ class EinladungListCreateView(GenericAPIView):
     post=extend_schema(
         operation_id='einladung_kommentar_create',
         summary='Kommentar zu Einladung anlegen',
+        description=(
+            'Erstellt einen Kommentar zur angegebenen Einladung.\n\nParameter:\n'
+        ),
         request=serializers.Einladung_KommentarCreateNestedSerializer(),
         responses=serializers.Einladung_KommentarSerializer(),
         parameters=[
@@ -142,6 +211,24 @@ class EinladungListCreateView(GenericAPIView):
                 },
                 request_only=True,
             ),
+            OpenApiExample(
+                'cURL-Beispiel',
+                value={
+                    'curl': "curl -X POST 'https://api.example.com/api/v1/einladungen/34/kommentare/' -H 'Content-Type: application/json' -d '{\"Parent_ID\": null, \"Absender_ID\": 2, \"Kommentar_Inhalt\": \"Sieht gut aus.\"}'"
+                },
+            ),
+            OpenApiExample(
+                'Beispiel-Response (Kommentar)',
+                value={
+                    'Einladung_Kommentar_ID': 78,
+                    'Veranstaltung_Einladung_ID': 34,
+                    'Parent_ID': None,
+                    'Absender_ID': 2,
+                    'Kommentar_Inhalt': 'Sieht gut aus.',
+                    'Erstellt_Am': '2026-05-24T12:34:56Z'
+                },
+                response_only=True,
+            ),
         ],
     ),
 )
@@ -162,6 +249,9 @@ class EinladungKommentarCreateView(GenericAPIView):
     post=extend_schema(
         operation_id='einladung_entscheidung_create',
         summary='Entscheidung zu Einladung anlegen',
+        description=(
+            'Legt eine Entscheidung (z. B. Annahme/Ablehnung) für eine Einladung an.\n\n'
+        ),
         request=serializers.Einladung_EntscheidungCreateNestedSerializer(),
         responses=serializers.Einladung_EntscheidungSerializer(),
         parameters=[
@@ -171,6 +261,34 @@ class EinladungKommentarCreateView(GenericAPIView):
                 location=OpenApiParameter.PATH,
                 required=True,
                 description='ID der Einladung, zu der die Entscheidung gehört',
+            ),
+        ],
+        examples=[
+            OpenApiExample(
+                'Beispiel-Anfrage',
+                value={
+                    'Entscheidung': 'angenommen',
+                    'Entscheidung_Datum': '2026-06-02',
+                    'Entscheider_ID': 2
+                },
+                request_only=True,
+            ),
+            OpenApiExample(
+                'cURL-Beispiel',
+                value={
+                    'curl': "curl -X POST 'https://api.example.com/api/v1/einladungen/34/entscheidungen/' -H 'Content-Type: application/json' -d '{\"Entscheidung\": \"angenommen\", \"Entscheidung_Datum\": \"2026-06-02\", \"Entscheider_ID\": 2}'"
+                },
+            ),
+            OpenApiExample(
+                'Beispiel-Response (Entscheidung)',
+                value={
+                    'Einladung_Entscheidung_ID': 21,
+                    'Veranstaltung_Einladung_ID': 34,
+                    'Entscheidung': 'angenommen',
+                    'Entscheidung_Datum': '2026-06-02',
+                    'Entscheider_ID': 2
+                },
+                response_only=True,
             ),
         ],
     ),
@@ -192,6 +310,9 @@ class EinladungEntscheidungCreateView(GenericAPIView):
     get=extend_schema(
         operation_id='einladung_detail',
         summary='Einladung anzeigen',
+        description=(
+            'Gibt die Detailinformationen einer einzelnen Einladung zurück.\n\n'
+        ),
         responses=serializers.Veranstaltung_EinladungSerializer(),
         parameters=[
             OpenApiParameter(
@@ -202,10 +323,34 @@ class EinladungEntscheidungCreateView(GenericAPIView):
                 description='ID der spezifischen Einladung',
             ),
         ],
+        examples=[
+            OpenApiExample(
+                'Beispiel-URL',
+                value={
+                    'curl': "curl -X GET 'https://api.example.com/api/v1/einladungen/34/'"
+                },
+            ),
+            OpenApiExample(
+                'Beispiel-Response (Detail)',
+                value={
+                    'Veranstaltung_Einladung_ID': 34,
+                    'Veranstaltung_ID': 12,
+                    'Anfragesteller_ID': 5,
+                    'Einladung_Datum': '2026-06-01',
+                    'Betreff': 'Einladung zur Konferenz',
+                    'Beschreibung': 'Wir möchten Sie herzlich einladen.',
+                    'Status': 'Offen'
+                },
+                response_only=True,
+            ),
+        ],
     ),
     patch=extend_schema(
         operation_id='einladung_partial_update',
         summary='Einladung anpassen',
+        description=(
+            'Führt ein partielles Update an einer bestehenden Einladung durch.\n'
+        ),
         request=serializers.Veranstaltung_EinladungCreateSerializer(),
         responses=serializers.Veranstaltung_EinladungSerializer(),
         parameters=[
@@ -215,6 +360,28 @@ class EinladungEntscheidungCreateView(GenericAPIView):
                 location=OpenApiParameter.PATH,
                 required=True,
                 description='ID der spezifischen Einladung',
+            ),
+        ],
+        examples=[
+            OpenApiExample(
+                'Patch-Beispiel',
+                value={
+                    'curl': "curl -X PATCH 'https://api.example.com/api/v1/einladungen/34/' -H 'Content-Type: application/json' -d '{\"Betreff\": \"Neuer Betreff\"}'"
+                },
+                request_only=True,
+            ),
+            OpenApiExample(
+                'Beispiel-Response (Patch)',
+                value={
+                    'Veranstaltung_Einladung_ID': 34,
+                    'Veranstaltung_ID': 12,
+                    'Anfragesteller_ID': 5,
+                    'Einladung_Datum': '2026-06-01',
+                    'Betreff': 'Neuer Betreff',
+                    'Beschreibung': 'Wir möchten Sie herzlich einladen.',
+                    'Status': 'Offen'
+                },
+                response_only=True,
             ),
         ],
     ),
