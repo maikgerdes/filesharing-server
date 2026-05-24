@@ -1,0 +1,105 @@
+version: 1
+
+description: >
+  Mapping-Konfiguration fuer den Import: Welche JSON-Schluessel fuer welches
+  Modelfeld akzeptiert werden.
+
+models:
+  veranstalter:
+    django_model: webserver.models.Veranstalter
+    field_mappings:
+      Veranstalter_Name:
+        accepted_json_keys:
+          - veranstalter_name
+          - veranstalter
+          - name_des_veranstalters
+      Veranstalter_Email:
+        accepted_json_keys:
+          - veranstalter_email
+          - email
+          - kontakt_email
+      Veranstalter_Telefonnummer:
+        accepted_json_keys:
+          - telefon
+          - telefonnummer
+          - kontakt_telefon
+      Veranstalter_Hauptsitz:
+        accepted_json_keys:
+          - hauptsitz
+          - standort
+          - ort
+          - hauptsitz_veranstalter
+
+  veranstaltung:
+    django_model: webserver.models.Veranstaltung
+    field_mappings:
+      Veranstalter_ID:
+        accepted_json_keys:
+          - veranstalter_id
+      Veranstaltung_Name:
+        accepted_json_keys:
+          - veranstaltungsname
+          - titel
+          - event_name
+      Veranstaltung_Beschreibung:
+        accepted_json_keys:
+          - beschreibung
+          - details
+      Veranstaltung_Webseite:
+        accepted_json_keys:
+          - webseite
+          - website
+          - url
+      Veranstaltung_Sprache:
+        accepted_json_keys:
+          - sprache
+          - language
+      Veranstaltung_Subevent:
+        accepted_json_keys:
+          - subevent
+          - unterevent
+      Veranstaltung_Kategorie_ID:
+        accepted_json_keys:
+          - veranstaltung_kategorie_id
+          - kategorie_id
+
+  einladung:
+    django_model: webserver.models.Veranstaltung_Einladung
+    derived_fields:
+      Veranstaltung_ID:
+        source: db_lookup
+        lookup_model: webserver.models.Veranstaltung
+        lookup_field: Veranstaltung_Name
+        payload_keys:
+          - veranstaltung_name
+          - veranstaltungsname
+          - event_name
+      Anfragesteller_ID:
+        source: context
+        context_key: uploader_id
+      Status:
+        source: system_default
+        lookup_model: webserver.models.Einladung_Status
+        lookup_field: Status_Titel
+        lookup_value: Offen
+    field_mappings:
+      VIP_anwesend:
+        accepted_json_keys:
+          - vip_anwesend
+          - vip
+      Repraesentiert:
+        accepted_json_keys:
+          - repraesentiert
+          - personengruppe_id
+      Ticket_Typ:
+        accepted_json_keys:
+          - ticket_typ
+          - ticket_type
+      Veranstaltung_Grund:
+        accepted_json_keys:
+          - grund
+          - begruendung
+      Anzahl_Eingeladener_Gäste:
+        accepted_json_keys:
+          - anzahl_eingeladener_gaeste
+          - gaesteanzahl

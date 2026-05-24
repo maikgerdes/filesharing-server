@@ -1,0 +1,1237 @@
+openapi: 3.0.3
+info:
+  title: Veranstaltungsplaner
+  version: 1.0.0
+  description: Veranstaltungsplaner
+paths:
+  /api/v1/einladungen/:
+    get:
+      operationId: einladungen_list_filtered
+      summary: Einladungen auflisten und filtern
+      parameters:
+      - in: query
+        name: anfragesteller_id
+        schema:
+          type: integer
+        description: Filtert Einladungen nach der ID des Anfragestellers
+      - in: query
+        name: datum
+        schema:
+          type: string
+        description: 'Filtert nach dem Einladungsdatum. Formate: exact:YYYY-MM-DD,
+          lt:YYYY-MM-DD, gt:YYYY-MM-DD'
+      - in: query
+        name: personengruppe_anfragesteller_id
+        schema:
+          type: integer
+        description: Filtert Einladungen nach der ID der jeweiligen Personengruppe
+          des Anfragestellers
+      - in: query
+        name: veranstaltung_id
+        schema:
+          type: integer
+        description: Filtert Einladungen nach der ID der Veranstaltung, zu welcher
+          eingeladen wurde
+      tags:
+      - einladungen
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Veranstaltung_Einladung'
+          description: ''
+    post:
+      operationId: einladung_create
+      summary: Einladung anlegen
+      tags:
+      - einladungen
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Veranstaltung_EinladungCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Veranstaltung_EinladungCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Veranstaltung_EinladungCreate'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Veranstaltung_Einladung'
+          description: ''
+  /api/v1/einladungen/{einladung_id}/:
+    get:
+      operationId: einladung_detail
+      summary: Einladung anzeigen
+      parameters:
+      - in: path
+        name: einladung_id
+        schema:
+          type: integer
+        description: ID der spezifischen Einladung
+        required: true
+      tags:
+      - einladungen
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Veranstaltung_Einladung'
+          description: ''
+    patch:
+      operationId: einladung_partial_update
+      summary: Einladung anpassen
+      parameters:
+      - in: path
+        name: einladung_id
+        schema:
+          type: integer
+        description: ID der spezifischen Einladung
+        required: true
+      tags:
+      - einladungen
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedVeranstaltung_EinladungCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedVeranstaltung_EinladungCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedVeranstaltung_EinladungCreate'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Veranstaltung_Einladung'
+          description: ''
+  /api/v1/einladungen/{einladung_id}/entscheidungen:
+    post:
+      operationId: einladung_entscheidung_create
+      summary: Entscheidung zu Einladung anlegen
+      parameters:
+      - in: path
+        name: einladung_id
+        schema:
+          type: integer
+        description: ID der Einladung, zu der die Entscheidung gehört
+        required: true
+      tags:
+      - einladungen
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Einladung_EntscheidungCreateNested'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Einladung_EntscheidungCreateNested'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Einladung_EntscheidungCreateNested'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Einladung_Entscheidung'
+          description: ''
+  /api/v1/einladungen/{einladung_id}/kommentare:
+    post:
+      operationId: einladung_kommentar_create
+      summary: Kommentar zu Einladung anlegen
+      parameters:
+      - in: path
+        name: einladung_id
+        schema:
+          type: integer
+        description: ID der Einladung, zu der der Kommentar gehört
+        required: true
+      tags:
+      - einladungen
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Einladung_KommentarCreateNested'
+            examples:
+              Root-Kommentar:
+                value:
+                  Parent_ID: null
+                  Absender_ID: 2
+                  Kommentar_Inhalt: Ich habe die Einladung geprüft und lasse hier
+                    Feedback da.
+              AntwortAufKommentar:
+                value:
+                  Parent_ID: 5
+                  Absender_ID: 2
+                  Kommentar_Inhalt: Danke, ich habe es angepasst.
+                summary: Antwort auf Kommentar
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Einladung_KommentarCreateNested'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Einladung_KommentarCreateNested'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Einladung_Kommentar'
+          description: ''
+  /api/v1/upload/docx/:
+    post:
+      operationId: docx_document
+      tags:
+      - upload
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DateiUpload'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DateiUpload'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Datei'
+          description: ''
+  /api/v1/upload/docx/update-json/:
+    post:
+      operationId: update_datei_json
+      tags:
+      - upload
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DateiJsonUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DateiJsonUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DateiJsonUpdate'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Datei'
+          description: ''
+  /api/v1/upload/docx/validate-model/:
+    post:
+      operationId: validate_datei_json_against_model
+      tags:
+      - upload
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DateiModelValidation'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DateiModelValidation'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DateiModelValidation'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DateiModelValidation'
+          description: ''
+  /api/v1/veranstalter/:
+    get:
+      operationId: veranstalter_list_filtered
+      summary: Veranstalter auflisten und filtern
+      parameters:
+      - in: query
+        name: veranstalter_hauptsitz
+        schema:
+          type: string
+        description: Filtert Veranstalter nach Hauptsitz
+      - in: query
+        name: veranstalter_name
+        schema:
+          type: string
+        description: Filtert Veranstalter nach Name
+      tags:
+      - veranstalter
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VeranstalterList'
+          description: ''
+    post:
+      operationId: veranstalter_create
+      summary: Veranstalter anlegen
+      tags:
+      - veranstalter
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VeranstalterCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/VeranstalterCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/VeranstalterCreate'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VeranstalterDetail'
+          description: ''
+  /api/v1/veranstalter/{veranstalter_id}/:
+    get:
+      operationId: veranstalter_detail
+      summary: Veranstalter anzeigen
+      parameters:
+      - in: path
+        name: veranstalter_id
+        schema:
+          type: integer
+        description: ID des spezifischen Veranstalters
+        required: true
+      tags:
+      - veranstalter
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VeranstalterDetail'
+          description: ''
+    patch:
+      operationId: veranstalter_partial_update
+      summary: Veranstalter anpassen
+      parameters:
+      - in: path
+        name: veranstalter_id
+        schema:
+          type: integer
+        description: ID des spezifischen Veranstalters
+        required: true
+      tags:
+      - veranstalter
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedVeranstalterUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedVeranstalterUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedVeranstalterUpdate'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VeranstalterDetail'
+          description: ''
+  /api/v1/veranstaltungen/:
+    get:
+      operationId: veranstaltung_list_filtered
+      summary: Veranstaltungen auflisten und filtern
+      parameters:
+      - in: query
+        name: veranstalter_id
+        schema:
+          type: integer
+        description: Filtert Veranstaltungen nach der Veranstalter_ID
+      - in: query
+        name: veranstaltung_kategorie_id
+        schema:
+          type: integer
+        description: Filtert Veranstaltungen nach der Kategorie_ID
+      - in: query
+        name: veranstaltung_name
+        schema:
+          type: string
+        description: Filtert Veranstaltungen nach dem Namen
+      tags:
+      - veranstaltungen
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VeranstaltungList'
+          description: ''
+    post:
+      operationId: veranstaltung_create
+      summary: Veranstaltung anlegen
+      tags:
+      - veranstaltungen
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VeranstaltungCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/VeranstaltungCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/VeranstaltungCreate'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VeranstaltungDetail'
+          description: ''
+  /api/v1/veranstaltungen/{veranstaltung_id}/:
+    get:
+      operationId: veranstaltung_detail
+      summary: Veranstaltung anzeigen
+      parameters:
+      - in: path
+        name: veranstaltung_id
+        schema:
+          type: integer
+        description: ID der spezifischen Veranstaltung
+        required: true
+      tags:
+      - veranstaltungen
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VeranstaltungDetail'
+          description: ''
+    patch:
+      operationId: veranstaltung_partial_update
+      summary: Veranstaltung anpassen
+      parameters:
+      - in: path
+        name: veranstaltung_id
+        schema:
+          type: integer
+        description: ID der spezifischen Veranstaltung
+        required: true
+      tags:
+      - veranstaltungen
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedVeranstaltungUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedVeranstaltungUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedVeranstaltungUpdate'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VeranstaltungDetail'
+          description: ''
+  /api/v1/veranstaltungen/{veranstaltung_id}/tickets:
+    post:
+      operationId: veranstaltung_ticket_create
+      summary: Ticket-Umfang für Veranstaltung anlegen
+      parameters:
+      - in: path
+        name: veranstaltung_id
+        schema:
+          type: integer
+        description: ID der Veranstaltung, zu der der Ticket-Umfang gehört
+        required: true
+      tags:
+      - veranstaltungen
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Veranstaltung_Ticket_UmfangCreateNested'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Veranstaltung_Ticket_UmfangCreateNested'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Veranstaltung_Ticket_UmfangCreateNested'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Veranstaltung_Ticket_Umfang'
+          description: ''
+  /api/v1/veranstaltungen/{veranstaltung_id}/tickets/{ticket_typ}:
+    patch:
+      operationId: veranstaltung_ticket_partial_update
+      summary: Ticket-Umfang anpassen
+      parameters:
+      - in: path
+        name: ticket_typ
+        schema:
+          type: string
+        description: Ticket-Typ des zu ändernden Ticket-Umfangs
+        required: true
+      - in: path
+        name: veranstaltung_id
+        schema:
+          type: integer
+        description: ID der Veranstaltung, zu der der Ticket-Umfang gehört
+        required: true
+      tags:
+      - veranstaltungen
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedVeranstaltung_Ticket_UmfangUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedVeranstaltung_Ticket_UmfangUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedVeranstaltung_Ticket_UmfangUpdate'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Veranstaltung_Ticket_Umfang'
+          description: ''
+components:
+  schemas:
+    Datei:
+      type: object
+      properties:
+        Datei_ID:
+          type: integer
+          readOnly: true
+        Datei_Name:
+          type: string
+          maxLength: 150
+        Datei_Pfad:
+          type: string
+          maxLength: 100
+        Datei_Typ:
+          type: string
+          maxLength: 100
+        Datei_Inhalt: {}
+        Uploaddatum:
+          type: string
+          format: date-time
+          readOnly: true
+        Datei_Inhalt_Benoetigt:
+          type: boolean
+        Uploader:
+          type: integer
+      required:
+      - Datei_ID
+      - Datei_Inhalt
+      - Datei_Inhalt_Benoetigt
+      - Datei_Name
+      - Datei_Pfad
+      - Datei_Typ
+      - Uploaddatum
+      - Uploader
+    DateiJsonUpdate:
+      type: object
+      properties:
+        Datei_ID:
+          type: integer
+        Datei_Inhalt:
+          type: object
+          additionalProperties: {}
+      required:
+      - Datei_ID
+      - Datei_Inhalt
+    DateiModelValidation:
+      type: object
+      properties:
+        Datei_ID:
+          type: integer
+        Zielmodell:
+          $ref: '#/components/schemas/ZielmodellEnum'
+        Zielmodelle:
+          type: array
+          items:
+            $ref: '#/components/schemas/ZielmodelleEnum'
+        Anlegen_Bei_Kompatibilitaet:
+          type: boolean
+          default: false
+      required:
+      - Datei_ID
+    DateiUpload:
+      type: object
+      properties:
+        file:
+          type: string
+          format: uri
+        Uploader:
+          type: integer
+      required:
+      - Uploader
+      - file
+    Einladung_Entscheidung:
+      type: object
+      properties:
+        Veranstaltung_Einladung_ID:
+          type: integer
+        Personengruppe_ID:
+          type: integer
+        Zugesagt_von_Person_ID:
+          type: integer
+        Zugesagt:
+          type: boolean
+        Anmerkung:
+          type: string
+        Entscheidungs_Datum:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - Anmerkung
+      - Entscheidungs_Datum
+      - Personengruppe_ID
+      - Veranstaltung_Einladung_ID
+      - Zugesagt
+      - Zugesagt_von_Person_ID
+    Einladung_EntscheidungCreateNested:
+      type: object
+      properties:
+        Personengruppe_ID:
+          type: integer
+        Zugesagt_von_Person_ID:
+          type: integer
+        Zugesagt:
+          type: boolean
+        Anmerkung:
+          type: string
+      required:
+      - Anmerkung
+      - Personengruppe_ID
+      - Zugesagt
+      - Zugesagt_von_Person_ID
+    Einladung_Kommentar:
+      type: object
+      properties:
+        Kommentar_ID:
+          type: integer
+          readOnly: true
+        Kommentar_Inhalt:
+          type: string
+        Verfassungsdatum:
+          type: string
+          format: date-time
+          readOnly: true
+        Veranstaltung_Einladung_ID:
+          type: integer
+        Parent_ID:
+          type: integer
+          nullable: true
+        Absender_ID:
+          type: integer
+      required:
+      - Absender_ID
+      - Kommentar_ID
+      - Kommentar_Inhalt
+      - Veranstaltung_Einladung_ID
+      - Verfassungsdatum
+    Einladung_KommentarCreateNested:
+      type: object
+      properties:
+        Parent_ID:
+          type: integer
+          nullable: true
+        Absender_ID:
+          type: integer
+        Kommentar_Inhalt:
+          type: string
+      required:
+      - Absender_ID
+      - Kommentar_Inhalt
+    PatchedVeranstalterUpdate:
+      type: object
+      properties:
+        Veranstalter_Name:
+          type: string
+          maxLength: 150
+        Veranstalter_Email:
+          type: string
+          format: email
+          nullable: true
+          maxLength: 254
+        Veranstalter_Telefonnummer:
+          type: string
+          nullable: true
+          maxLength: 100
+        Veranstalter_Hauptsitz:
+          type: string
+          maxLength: 100
+        Informationen_Geprueft:
+          type: boolean
+        Geprueft_Von:
+          type: integer
+          nullable: true
+    PatchedVeranstaltungUpdate:
+      type: object
+      properties:
+        Veranstalter_ID:
+          type: integer
+        Veranstaltung_Name:
+          type: string
+          maxLength: 150
+        Veranstaltung_Beschreibung:
+          type: string
+        Veranstaltung_Webseite:
+          type: string
+          maxLength: 100
+        Veranstaltung_Sprache:
+          type: string
+          maxLength: 50
+        Veranstaltung_Subevent:
+          type: string
+          maxLength: 50
+        Veranstaltung_Kategorie_ID:
+          type: integer
+        Informationen_Geprueft:
+          type: boolean
+        Geprueft_Von:
+          type: integer
+          nullable: true
+    PatchedVeranstaltung_EinladungCreate:
+      type: object
+      properties:
+        Veranstaltung_Einladung_ID:
+          type: integer
+          readOnly: true
+        VIP_anwesend:
+          type: boolean
+        Anfragesteller_ID:
+          type: integer
+        Repraesentiert:
+          type: integer
+        Veranstaltung_ID:
+          type: integer
+        Ticket_Typ:
+          type: string
+          maxLength: 150
+        Veranstaltung_Grund:
+          type: string
+        Anzahl_Eingeladener_Gäste:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        Einladung_Datum:
+          type: string
+          format: date-time
+          readOnly: true
+        Status:
+          type: integer
+        Veranstaltung_Ticket_Umfang:
+          allOf:
+          - $ref: '#/components/schemas/Veranstaltung_Ticket_Umfang'
+          readOnly: true
+    PatchedVeranstaltung_Ticket_UmfangUpdate:
+      type: object
+      properties:
+        Aufnahmen:
+          type: boolean
+        Aufnahmen_Zensiert:
+          type: boolean
+        Umfang_der_Aufnahmen:
+          type: string
+        Kosten:
+          type: number
+          format: double
+        Informationen_Geprueft:
+          type: boolean
+        Geprueft_Von:
+          type: integer
+          nullable: true
+    VeranstalterCreate:
+      type: object
+      properties:
+        Veranstalter_Name:
+          type: string
+          maxLength: 150
+        Veranstalter_Email:
+          type: string
+          format: email
+          nullable: true
+          maxLength: 254
+        Veranstalter_Telefonnummer:
+          type: string
+          nullable: true
+          maxLength: 100
+        Veranstalter_Hauptsitz:
+          type: string
+          maxLength: 100
+      required:
+      - Veranstalter_Hauptsitz
+      - Veranstalter_Name
+    VeranstalterDetail:
+      type: object
+      properties:
+        Veranstalter_ID:
+          type: integer
+          readOnly: true
+        Veranstalter_Name:
+          type: string
+          maxLength: 150
+        Veranstalter_Email:
+          type: string
+          format: email
+          nullable: true
+          maxLength: 254
+        Veranstalter_Telefonnummer:
+          type: string
+          nullable: true
+          maxLength: 100
+        Veranstalter_Hauptsitz:
+          type: string
+          maxLength: 100
+        Informationen_Geprueft:
+          type: boolean
+        Geprueft_Von:
+          type: integer
+          nullable: true
+        Veranstaltungen:
+          type: array
+          items:
+            $ref: '#/components/schemas/VeranstaltungList'
+          readOnly: true
+      required:
+      - Veranstalter_Hauptsitz
+      - Veranstalter_ID
+      - Veranstalter_Name
+      - Veranstaltungen
+    VeranstalterList:
+      type: object
+      properties:
+        Veranstalter_ID:
+          type: integer
+          readOnly: true
+        Veranstalter_Name:
+          type: string
+          maxLength: 150
+        Veranstalter_Email:
+          type: string
+          format: email
+          nullable: true
+          maxLength: 254
+        Veranstalter_Telefonnummer:
+          type: string
+          nullable: true
+          maxLength: 100
+        Veranstalter_Hauptsitz:
+          type: string
+          maxLength: 100
+        Informationen_Geprueft:
+          type: boolean
+        Geprueft_Von:
+          type: integer
+          nullable: true
+      required:
+      - Veranstalter_Hauptsitz
+      - Veranstalter_ID
+      - Veranstalter_Name
+    VeranstaltungCreate:
+      type: object
+      properties:
+        Veranstalter_ID:
+          type: integer
+        Veranstaltung_Name:
+          type: string
+          maxLength: 150
+        Veranstaltung_Beschreibung:
+          type: string
+        Veranstaltung_Webseite:
+          type: string
+          maxLength: 100
+        Veranstaltung_Sprache:
+          type: string
+          maxLength: 50
+        Veranstaltung_Subevent:
+          type: string
+          maxLength: 50
+        Veranstaltung_Kategorie_ID:
+          type: integer
+      required:
+      - Veranstalter_ID
+      - Veranstaltung_Beschreibung
+      - Veranstaltung_Kategorie_ID
+      - Veranstaltung_Name
+      - Veranstaltung_Sprache
+      - Veranstaltung_Subevent
+      - Veranstaltung_Webseite
+    VeranstaltungDetail:
+      type: object
+      properties:
+        Veranstaltung_ID:
+          type: integer
+          readOnly: true
+        Veranstalter_ID:
+          type: integer
+        Veranstaltung_Name:
+          type: string
+          maxLength: 150
+        Veranstaltung_Beschreibung:
+          type: string
+        Veranstaltung_Webseite:
+          type: string
+          maxLength: 100
+        Veranstaltung_Sprache:
+          type: string
+          maxLength: 50
+        Veranstaltung_Subevent:
+          type: string
+          maxLength: 50
+        Veranstaltung_Kategorie_ID:
+          type: integer
+        Informationen_Geprueft:
+          type: boolean
+        Geprueft_Von:
+          type: integer
+          nullable: true
+        Ticket_Arten:
+          type: array
+          items:
+            $ref: '#/components/schemas/Veranstaltung_Ticket_Umfang'
+          readOnly: true
+        Einladungen:
+          type: array
+          items:
+            $ref: '#/components/schemas/Veranstaltung_Einladung'
+          readOnly: true
+      required:
+      - Einladungen
+      - Ticket_Arten
+      - Veranstalter_ID
+      - Veranstaltung_Beschreibung
+      - Veranstaltung_ID
+      - Veranstaltung_Kategorie_ID
+      - Veranstaltung_Name
+      - Veranstaltung_Sprache
+      - Veranstaltung_Subevent
+      - Veranstaltung_Webseite
+    VeranstaltungList:
+      type: object
+      properties:
+        Veranstaltung_ID:
+          type: integer
+          readOnly: true
+        Veranstalter_ID:
+          type: integer
+        Veranstaltung_Name:
+          type: string
+          maxLength: 150
+        Veranstaltung_Beschreibung:
+          type: string
+        Veranstaltung_Webseite:
+          type: string
+          maxLength: 100
+        Veranstaltung_Sprache:
+          type: string
+          maxLength: 50
+        Veranstaltung_Subevent:
+          type: string
+          maxLength: 50
+        Veranstaltung_Kategorie_ID:
+          type: integer
+        Informationen_Geprueft:
+          type: boolean
+        Geprueft_Von:
+          type: integer
+          nullable: true
+      required:
+      - Veranstalter_ID
+      - Veranstaltung_Beschreibung
+      - Veranstaltung_ID
+      - Veranstaltung_Kategorie_ID
+      - Veranstaltung_Name
+      - Veranstaltung_Sprache
+      - Veranstaltung_Subevent
+      - Veranstaltung_Webseite
+    Veranstaltung_Einladung:
+      type: object
+      properties:
+        Veranstaltung_Einladung_ID:
+          type: integer
+          readOnly: true
+        VIP_anwesend:
+          type: boolean
+        Anfragesteller_ID:
+          type: integer
+        Repraesentiert:
+          type: integer
+        Veranstaltung_ID:
+          type: integer
+        Ticket_Typ:
+          type: string
+          maxLength: 150
+        Veranstaltung_Grund:
+          type: string
+        Anzahl_Eingeladener_Gäste:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        Einladung_Datum:
+          type: string
+          format: date-time
+          readOnly: true
+        Status:
+          type: integer
+        Veranstaltung_Ticket_Umfang:
+          allOf:
+          - $ref: '#/components/schemas/Veranstaltung_Ticket_Umfang'
+          readOnly: true
+      required:
+      - Anfragesteller_ID
+      - Anzahl_Eingeladener_Gäste
+      - Einladung_Datum
+      - Repraesentiert
+      - Status
+      - Ticket_Typ
+      - VIP_anwesend
+      - Veranstaltung_Einladung_ID
+      - Veranstaltung_Grund
+      - Veranstaltung_ID
+      - Veranstaltung_Ticket_Umfang
+    Veranstaltung_EinladungCreate:
+      type: object
+      properties:
+        Veranstaltung_Einladung_ID:
+          type: integer
+          readOnly: true
+        VIP_anwesend:
+          type: boolean
+        Anfragesteller_ID:
+          type: integer
+        Repraesentiert:
+          type: integer
+        Veranstaltung_ID:
+          type: integer
+        Ticket_Typ:
+          type: string
+          maxLength: 150
+        Veranstaltung_Grund:
+          type: string
+        Anzahl_Eingeladener_Gäste:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        Einladung_Datum:
+          type: string
+          format: date-time
+          readOnly: true
+        Status:
+          type: integer
+        Veranstaltung_Ticket_Umfang:
+          allOf:
+          - $ref: '#/components/schemas/Veranstaltung_Ticket_Umfang'
+          readOnly: true
+      required:
+      - Anfragesteller_ID
+      - Anzahl_Eingeladener_Gäste
+      - Einladung_Datum
+      - Repraesentiert
+      - Status
+      - Ticket_Typ
+      - VIP_anwesend
+      - Veranstaltung_Einladung_ID
+      - Veranstaltung_Grund
+      - Veranstaltung_ID
+      - Veranstaltung_Ticket_Umfang
+    Veranstaltung_Ticket_Umfang:
+      type: object
+      properties:
+        Veranstaltung_ID:
+          type: integer
+        Ticket_Typ:
+          type: string
+          maxLength: 150
+        Aufnahmen:
+          type: boolean
+        Aufnahmen_Zensiert:
+          type: boolean
+        Umfang_der_Aufnahmen:
+          type: string
+        Kosten:
+          type: number
+          format: double
+        Informationen_Geprueft:
+          type: boolean
+        Geprueft_Von:
+          type: integer
+          nullable: true
+      required:
+      - Aufnahmen
+      - Aufnahmen_Zensiert
+      - Kosten
+      - Ticket_Typ
+      - Umfang_der_Aufnahmen
+      - Veranstaltung_ID
+    Veranstaltung_Ticket_UmfangCreateNested:
+      type: object
+      properties:
+        Ticket_Typ:
+          type: string
+          maxLength: 150
+        Aufnahmen:
+          type: boolean
+        Aufnahmen_Zensiert:
+          type: boolean
+        Umfang_der_Aufnahmen:
+          type: string
+        Kosten:
+          type: number
+          format: double
+      required:
+      - Aufnahmen
+      - Aufnahmen_Zensiert
+      - Kosten
+      - Ticket_Typ
+      - Umfang_der_Aufnahmen
+    ZielmodellEnum:
+      enum:
+      - veranstalter
+      - veranstaltung
+      - einladung
+      type: string
+      description: |-
+        * `veranstalter` - veranstalter
+        * `veranstaltung` - veranstaltung
+        * `einladung` - einladung
+    ZielmodelleEnum:
+      enum:
+      - veranstalter
+      - veranstaltung
+      - einladung
+      type: string
+      description: |-
+        * `veranstalter` - veranstalter
+        * `veranstaltung` - veranstaltung
+        * `einladung` - einladung
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid

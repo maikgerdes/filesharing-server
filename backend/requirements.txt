@@ -1,2 +1,11 @@
 Django
+djangorestframework
 psycopg[binary]
+pyyaml
+requests
+azure-identity
+azure-keyvault-secrets
+dotenv
+python-docx
+drf-spectacular
+azure-storage-blob

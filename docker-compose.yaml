@@ -26,7 +26,6 @@ services:
     network_mode: service:database
     env_file:
       - .env
-
   database:
     image: postgres:17
     container_name: postgres_db
